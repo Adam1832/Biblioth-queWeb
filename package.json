@@ -1,0 +1,10 @@
+{
+  "description": "Application pour gérer des livres",
+  "dependencies": {
+    "express": "^5.1.0",
+    "node": "^20.19.2"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

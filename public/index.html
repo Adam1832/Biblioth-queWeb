@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliothèque Node.js</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+
+  <h1 class="font-bold text-2xl mb-4">Bibliothèque de livres Node.js</h1>
+  <ul id="bookList" class="mb-4"></ul>
+  <input type="text" id="titleInput" placeholder="Titre du livre..." class="border rounded p-2 mb-2">
+  <input type="text" id="authorInput" placeholder="Auteur..." class="border rounded p-2 mb-2 ml-2">
+  <button onclick="addBook()" class="bg-blue-500 text-white px-4 py-2 rounded ml-2">Ajouter</button>
+
+  <script>
+    const API = 'http://localhost:3000/api/books';
+
+    async function loadBooks() {
+      const res = await fetch(API);
+      const books = await res.json();
+      const list = document.getElementById('bookList');
+      list.innerHTML = '';
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.className = "mb-2";
+        li.innerHTML = `
+          <span class="font-semibold">${book.title}</span> <span class="text-gray-600">par ${book.author}</span>
+          <button onclick="editBook(${book.id})" class="ml-2 text-yellow-600">✏️</button>
+          <button onclick="deleteBook(${book.id})" class="ml-2 text-red-600">🗑️</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    async function addBook() {
+      const titleInput = document.getElementById('titleInput');
+      const authorInput = document.getElementById('authorInput');
+      const title = titleInput.value.trim();
+      const author = authorInput.value.trim();
+      if (!title || !author) return;
+      await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author })
+      });
+      titleInput.value = '';
+      authorInput.value = '';
+      loadBooks();
+    }
+
+    async function deleteBook(id) {
+      await fetch(`${API}/${id}`, { method: 'DELETE' });
+      loadBooks();
+    }
+
+    async function editBook(id) {
+      const newTitle = prompt("Nouveau titre ?");
+      const newAuthor = prompt("Nouvel auteur ?");
+      if (!newTitle && !newAuthor) return;
+      await fetch(`${API}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle, author: newAuthor })
+      });
+      loadBooks();
+    }
+
+    loadBooks();
+  </script>
+
+</body>
+</html>
